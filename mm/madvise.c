@@ -1029,6 +1029,7 @@ madvise_behavior_valid(int behavior)
 	case MADV_NOHUGEPAGE:
 	case MADV_IRREG:
 	case MADV_PROMOTE:
+	case MADV_PROMOTE_REF:
 	case MADV_DEMOTE:
 #endif
 	case MADV_DONTDUMP:
@@ -1056,6 +1057,7 @@ process_madvise_behavior_valid(int behavior)
 
 	// ANINDA: adding in support for synchronous promotion and demotion 
 	case MADV_PROMOTE:
+	case MADV_PROMOTE_REF:
 	case MADV_DEMOTE: 
 		return true;
 	default:
@@ -1112,6 +1114,9 @@ process_madvise_behavior_valid(int behavior)
  *              intelligent version of THP can be applied based on page hotness
  *  MADV_PROMOTE - synchronously promote the specified region of memory to be
  *		backed by hugepages
+ *  MADV_PROMOTE_REF - synchronously promote the specified region of memory to be
+ *		backed by hugepages if at least 50% of the pages in the region 
+ *		have been referenced
  *  MADV_DEMOTE - synchronously demote the specified region of memory to split
  *		hugepages
  *
@@ -1320,7 +1325,9 @@ SYSCALL_DEFINE5(process_madvise, int, pidfd, const struct iovec __user *, vec,
 
 		printk(KERN_DEBUG "process_madvise: pidfd %d, pid %d, behavior = %d, address = %lu, length = %lu, vaddr_start = %lu, vadd_end = %lu\n", pidfd, pid_val, behavior, (unsigned long)iovec.iov_base, iovec.iov_len, vaddr_start, vaddr_end); //ANINDA
 		if (behavior == MADV_PROMOTE) {
-			do_sync_promote(mm, vaddr_start, vaddr_end);
+			do_sync_promote(mm, vaddr_start, vaddr_end, false);
+		} else if (behavior == MADV_PROMOTE_REF) {
+			do_sync_promote(mm, vaddr_start, vaddr_end, true);
 		} else if (behavior == MADV_DEMOTE) {
 			split_huge_pages_pid(pid_val, vaddr_start, vaddr_end);
 		} else {

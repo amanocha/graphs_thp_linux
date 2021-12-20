@@ -57,7 +57,8 @@
 
 #define MADV_IRREG	24		/* Worth backing with hugepages based on page hotness */
 #define MADV_PROMOTE	25		/* Synchronously back region of memory specified with hugepages */
-#define MADV_DEMOTE	26		/* Synchronously split region of memory as hugepages */
+#define MADV_PROMOTE_REF	26	/* Synchronously back region of memory specified with hugepages if 50% referenced */
+#define MADV_DEMOTE	27		/* Synchronously split region of memory as hugepages */
 
 #define MADV_MERGEABLE   65		/* KSM may merge identical pages */
 #define MADV_UNMERGEABLE 66		/* KSM may not merge identical pages */

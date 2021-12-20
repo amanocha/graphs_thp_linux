@@ -184,7 +184,7 @@ void prep_transhuge_page(struct page *page);
 void free_transhuge_page(struct page *page);
 bool is_transparent_hugepage(struct page *page);
 
-unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, unsigned long vaddr_end); //ANINDA
+unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, unsigned long vaddr_end, bool by_reference); //ANINDA
 int split_huge_pages_pid(int pid, unsigned long vaddr_start, unsigned long vaddr_end); //ANINDA
 
 bool can_split_huge_page(struct page *page, int *pextra_pins);
