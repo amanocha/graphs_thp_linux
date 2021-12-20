@@ -1328,7 +1328,8 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 			       struct vm_area_struct *vma,
 			       unsigned long address,
 			       struct page **hpage,
-			       bool is_synchronous)
+			       bool is_synchronous,
+			       bool by_reference)
 {
 	pmd_t *pmd;
 	pte_t *pte, *_pte;
@@ -1477,13 +1478,16 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 	if (!writable) {
 		result = SCAN_PAGE_RO;
 		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_RO\n"); //ANINDA
-	} else if (!is_synchronous && (!referenced || (unmapped && referenced < HPAGE_PMD_NR/2))) {
+	} else if (!is_synchronous && !by_reference && (!referenced || (unmapped && referenced < HPAGE_PMD_NR/2))) {
 		result = SCAN_LACK_REFERENCED_PAGE;
 		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
+	} else if (is_synchronous && by_reference && (!referenced || (unmapped && referenced < HPAGE_PMD_NR))) {
+		result = SCAN_LACK_REFERENCED_PAGE;
+		printk(KERN_DEBUG "khugepaged_scan_pmd sync_promote_by_reference: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
 	} else {
 		result = SCAN_SUCCEED;
 		ret = 1;
-		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_SUCCEED\n"); //ANINDA
+		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_SUCCEED, references = %d\n", referenced); //ANINDA
 	}
 
 out_unmap:
@@ -2215,7 +2219,7 @@ bool setup_sync_promote(struct mm_struct *mm, struct vm_area_struct** vma,
 }
 
 //ANINDA: adding function for synchronous promotion
-unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, unsigned long vaddr_end)
+unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, unsigned long vaddr_end, bool by_reference)
 {
 	int progress = 0, ret;
 	struct page *hpage = NULL;
@@ -2239,7 +2243,7 @@ unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, un
 	//if (likely(!khugepaged_test_exit(mm))) { //check whether user process is still running - should always evaluate to true
 	if (!setup_sync_promote(mm, &vma, vaddr_start, vaddr_end, &hstart, &hend)) goto breakouterloop;
 
-	printk(KERN_DEBUG "do_sync_promote: found vma using address = %lu; start = %lu, end = %lu, hstart = %lu, hend = %lu, irreg = %u, is thp = %d\n", vaddr_start, vma->vm_start, vma->vm_end, hstart, hend, vma->is_irreg, __transparent_hugepage_enabled(vma)); //ANINDA
+	printk(KERN_DEBUG "do_sync_promote: found vma using address = %lu; start = %lu, end = %lu, hstart = %lu, hend = %lu, irreg = %u, is thp = %d, by reference = %d\n", vaddr_start, vma->vm_start, vma->vm_end, hstart, hend, vma->is_irreg, __transparent_hugepage_enabled(vma), by_reference); //ANINDA
 
 	progress++;
 
@@ -2272,7 +2276,7 @@ unsigned int do_sync_promote(struct mm_struct *mm, unsigned long vaddr_start, un
 		}
 
 		VM_BUG_ON(sync_promote_address < hstart || sync_promote_address + HPAGE_PMD_SIZE > hend);
-		ret = khugepaged_scan_pmd(mm, vma, sync_promote_address, &hpage, true);
+		ret = khugepaged_scan_pmd(mm, vma, sync_promote_address, &hpage, true, by_reference);
 			
 		/* move to next address */
 		sync_promote_address += HPAGE_PMD_SIZE;
@@ -2406,7 +2410,7 @@ skip:
 			} else {
 				ret = khugepaged_scan_pmd(mm, vma,
 						khugepaged_scan.address,
-						hpage, false);
+						hpage, false, false);
 			}
 			/* move to next address */
 			khugepaged_scan.address += HPAGE_PMD_SIZE;
