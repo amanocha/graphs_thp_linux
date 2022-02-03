@@ -29,6 +29,7 @@
 #include <linux/swapops.h>
 #include <linux/shmem_fs.h>
 #include <linux/mmu_notifier.h>
+#include <linux/gfp.h> //ANINDA
 
 #include <asm/tlb.h>
 
@@ -1351,4 +1352,17 @@ free_iov:
 	kfree(iov);
 out:
 	return ret;
+}
+
+SYSCALL_DEFINE1(user_kmalloc, unsigned int, order) 
+{
+	printk(KERN_DEBUG "user_kmalloc: order = %u\n", order);
+	return alloc_pages(GFP_KERNEL, order);
+}
+
+SYSCALL_DEFINE2(user_kfree, struct page *, page, unsigned int, order) 
+{
+	printk(KERN_DEBUG "user_kfree: addr = %lu, order = %u\n", (unsigned long) page, order);
+	__free_pages(page, order);
+	return 0;
 }

@@ -880,8 +880,13 @@ __SYSCALL(__NR_memfd_secret, sys_memfd_secret)
 #define __NR_process_mrelease 448
 __SYSCALL(__NR_process_mrelease, sys_process_mrelease)
 
+#define __NR_user_kmalloc 449
+__SYSCALL(__NR_user_kmalloc, sys_user_kmalloc)
+#define __NR_user_kfree 450
+__SYSCALL(__NR_user_kfree, sys_user_kfree)
+
 #undef __NR_syscalls
-#define __NR_syscalls 449
+#define __NR_syscalls 451
 
 /*
  * 32 bit systems traditionally used different

@@ -430,7 +430,6 @@ static inline pmd_t pmd_mkhuge(pmd_t pmd)
 
 static inline pmd_t pmd_mkyoung(pmd_t pmd)
 {
-	printk(KERN_DEBUG "PMD MAKE YOUNG!!!\n");
 	return pmd_set_flags(pmd, _PAGE_ACCESSED);
 }
 

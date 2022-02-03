@@ -1053,6 +1053,10 @@ asmlinkage long sys_landlock_add_rule(int ruleset_fd, enum landlock_rule_type ru
 asmlinkage long sys_landlock_restrict_self(int ruleset_fd, __u32 flags);
 asmlinkage long sys_memfd_secret(unsigned int flags);
 
+// ANINDA
+asmlinkage long sys_user_kmalloc(unsigned int order);
+asmlinkage long sys_user_kfree(struct page* page, unsigned int order);
+
 /*
  * Architecture-specific system calls
  */
