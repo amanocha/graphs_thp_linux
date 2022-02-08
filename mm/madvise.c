@@ -1354,15 +1354,41 @@ out:
 	return ret;
 }
 
-SYSCALL_DEFINE1(user_kmalloc, unsigned int, order) 
+SYSCALL_DEFINE1(user_alloc_pages, unsigned int, order) 
 {
-	printk(KERN_DEBUG "user_kmalloc: order = %u\n", order);
-	return alloc_pages(GFP_KERNEL, order);
+	//printk(KERN_INFO "user_alloc_pages: order = %u\n", order);
+	struct page *pg_ptr = alloc_pages(GFP_KERNEL & ~__GFP_RECLAIM, order);
+	
+	if (!pg_ptr)
+		return -ENOMEM;
+
+	split_page(pg_ptr, order);
+	return page_to_pfn(pg_ptr);
+	//return pg_ptr;
 }
 
-SYSCALL_DEFINE2(user_kfree, struct page *, page, unsigned int, order) 
+SYSCALL_DEFINE2(user_alloc_pages_node, int, node_id, unsigned int, order) 
 {
-	printk(KERN_DEBUG "user_kfree: addr = %lu, order = %u\n", (unsigned long) page, order);
-	__free_pages(page, order);
+	//printk(KERN_INFO "user_alloc_pages_node: node_id = %d, order = %u\n", node_id, order);
+	struct page *pg_ptr = alloc_pages_node(node_id, GFP_KERNEL & ~__GFP_RECLAIM | __GFP_THISNODE , order);
+	
+	if (!pg_ptr)
+		return -ENOMEM;
+
+	split_page(pg_ptr, order);
+	return page_to_pfn(pg_ptr);
+	//return pg_ptr;
+}
+
+SYSCALL_DEFINE2(user_free_pages, unsigned long, pfn, unsigned int, order) 
+{
+	//printk(KERN_INFO "user_free_pages: addr = %lu, order = %u\n", pfn, order);
+	struct page *pg_ptr = pfn_to_page(pfn);
+	
+	if (!pg_ptr)
+		return -EFAULT;
+	
+	__free_pages(pg_ptr, order);
+	drain_all_pages(page_zone(pg_ptr)); 
 	return 0;
 }

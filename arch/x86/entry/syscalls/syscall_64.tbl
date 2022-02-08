@@ -370,8 +370,9 @@
 446	common	landlock_restrict_self	sys_landlock_restrict_self
 447	common	memfd_secret		sys_memfd_secret
 448	common	process_mrelease	sys_process_mrelease
-449	common	user_kmalloc		sys_user_kmalloc
-450	common	user_kfree		sys_user_kfree
+449	common	user_alloc_pages	sys_user_alloc_pages
+450	common	user_alloc_pages_node	sys_user_alloc_pages_node
+451	common	user_free_pages		sys_user_free_pages
 
 #
 # Due to a historical design error, certain syscalls are numbered differently

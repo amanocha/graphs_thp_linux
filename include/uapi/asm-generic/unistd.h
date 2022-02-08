@@ -880,13 +880,15 @@ __SYSCALL(__NR_memfd_secret, sys_memfd_secret)
 #define __NR_process_mrelease 448
 __SYSCALL(__NR_process_mrelease, sys_process_mrelease)
 
-#define __NR_user_kmalloc 449
-__SYSCALL(__NR_user_kmalloc, sys_user_kmalloc)
-#define __NR_user_kfree 450
-__SYSCALL(__NR_user_kfree, sys_user_kfree)
+#define __NR_user_alloc_pages 449
+__SYSCALL(__NR_user_alloc_pages, sys_user_alloc_pages)
+#define __NR_user_alloc_pages 450
+__SYSCALL(__NR_user_alloc_pages_node, sys_user_alloc_pages_node)
+#define __NR_user_free_pages 451
+__SYSCALL(__NR_user_free_pages, sys_user_free_pages)
 
 #undef __NR_syscalls
-#define __NR_syscalls 451
+#define __NR_syscalls 452
 
 /*
  * 32 bit systems traditionally used different

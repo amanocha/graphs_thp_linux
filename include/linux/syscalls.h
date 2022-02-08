@@ -1054,8 +1054,9 @@ asmlinkage long sys_landlock_restrict_self(int ruleset_fd, __u32 flags);
 asmlinkage long sys_memfd_secret(unsigned int flags);
 
 // ANINDA
-asmlinkage long sys_user_kmalloc(unsigned int order);
-asmlinkage long sys_user_kfree(struct page* page, unsigned int order);
+asmlinkage long sys_user_alloc_pages(unsigned int order);
+asmlinkage long sys_user_alloc_pages_node(int node_id, unsigned int order);
+asmlinkage long sys_user_free_pages(unsigned long pfn, unsigned int order);
 
 /*
  * Architecture-specific system calls

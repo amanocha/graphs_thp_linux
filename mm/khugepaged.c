@@ -426,7 +426,7 @@ int hugepage_madvise(struct vm_area_struct *vma,
 	case MADV_HUGEPAGE:
 		if (advice == MADV_IRREG) vma->is_irreg = true;		
 
-		printk(KERN_DEBUG "hugepage_madvise: vma start = %lu, vma end = %lu, threshold = %u\n", vma->vm_start, vma->vm_end, khugepaged_irreg_hot_page_threshold);
+		//printk(KERN_DEBUG "hugepage_madvise: vma start = %lu, vma end = %lu, threshold = %u\n", vma->vm_start, vma->vm_end, khugepaged_irreg_hot_page_threshold); // ANINDA
 
 #ifdef CONFIG_S390
 		/*
@@ -695,19 +695,19 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 				continue;
 			} else {
 				result = SCAN_EXCEED_NONE_PTE;
-				printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_EXCEED_NONE_PTE\n"); //ANINDA
+				//printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_EXCEED_NONE_PTE\n"); //ANINDA
 				goto out;
 			}
 		}
 		if (!pte_present(pteval)) {
 			result = SCAN_PTE_NON_PRESENT;
-			printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PTE_NON_PRESENT\n"); //ANINDA
+			//printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PTE_NON_PRESENT\n"); //ANINDA
 			goto out;
 		}
 		page = vm_normal_page(vma, address, pteval);
 		if (unlikely(!page)) {
 			result = SCAN_PAGE_NULL;
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_NULL\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_NULL\n"); //ANINDA
 			goto out;
 		}
 
@@ -716,7 +716,7 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 		if (page_mapcount(page) > 1 &&
 				++shared > khugepaged_max_ptes_shared && !is_synchronous) { //ANINDA
 			result = SCAN_EXCEED_SHARED_PTE;
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_EXCEED_SHARED_PTE\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_EXCEED_SHARED_PTE\n"); //ANINDA
 			goto out;
 		}
 
@@ -741,7 +741,7 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 		 * when invoked from the VM.
 		 */
 		if (!trylock_page(page)) {
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_LOCK\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_LOCK\n"); //ANINDA
 			result = SCAN_PAGE_LOCK;
 			goto out;
 		}
@@ -760,7 +760,7 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 		if (!is_refcount_suitable(page)) {
 			unlock_page(page);
 			result = SCAN_PAGE_COUNT;
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_COUNT\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_COUNT\n"); //ANINDA
 			goto out;
 		}
 		if (!pte_write(pteval) && PageSwapCache(page) &&
@@ -771,7 +771,7 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 			 */
 			unlock_page(page);
 			result = SCAN_SWAP_CACHE_PAGE;
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_SWAP_CACHE_PAGE\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_SWAP_CACHE_PAGE\n"); //ANINDA
 			goto out;
 		}
 
@@ -782,7 +782,7 @@ static int __collapse_huge_page_isolate(struct vm_area_struct *vma,
 		if (isolate_lru_page(page)) {
 			unlock_page(page);
 			result = SCAN_DEL_PAGE_LRU;
-		        printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_DEL_PAGE_LRU\n"); //ANINDA
+		        //printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_DEL_PAGE_LRU\n"); //ANINDA
 			goto out;
 		}
 		mod_node_page_state(page_pgdat(page),
@@ -806,10 +806,10 @@ next:
 
 	if (unlikely(!writable)) {
 		result = SCAN_PAGE_RO;
-		printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_RO\n"); //ANINDA
+		//printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_PAGE_RO\n"); //ANINDA
 	} else if (unlikely(!referenced) && !is_synchronous) { //ANINDA
 		result = SCAN_LACK_REFERENCED_PAGE;
-		printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_LACK_REFERENCED_PAGE\n"); //ANINDA
+		//printk(KERN_DEBUG "__collapse_huge_page_isolate: SCAN_LACK_REFERENCED_PAGE\n"); //ANINDA
 	} else {
 		result = SCAN_SUCCEED;
 		trace_mm_collapse_huge_page_isolate(page, none_or_zero,
@@ -1178,13 +1178,13 @@ static void collapse_huge_page(struct mm_struct *mm,
 	new_page = khugepaged_alloc_page(hpage, gfp, node);
 	if (!new_page) {
 		result = SCAN_ALLOC_HUGE_PAGE_FAIL;
-		printk(KERN_DEBUG "collapse_huge_page: SCAN_ALLOC_HUGE_PAGE_FAIL\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: SCAN_ALLOC_HUGE_PAGE_FAIL\n"); //ANINDA
 		goto out_nolock;
 	}
 
 	if (unlikely(mem_cgroup_charge(new_page, mm, gfp))) {
 		result = SCAN_CGROUP_CHARGE_FAIL;
-		printk(KERN_DEBUG "collapse_huge_page: SCAN_CGROUP_CHARGE_FAIL\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: SCAN_CGROUP_CHARGE_FAIL\n"); //ANINDA
 		goto out_nolock;
 	}
 	count_memcg_page_event(new_page, THP_COLLAPSE_ALLOC);
@@ -1193,7 +1193,7 @@ static void collapse_huge_page(struct mm_struct *mm,
 	result = hugepage_vma_revalidate(mm, address, &vma, is_synchronous);
 	if (result) {
 		mmap_read_unlock(mm);
-		printk(KERN_DEBUG "collapse_huge_page: hugepage_vma not revalidated\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: hugepage_vma not revalidated\n"); //ANINDA
 		goto out_nolock;
 	}
 
@@ -1201,7 +1201,7 @@ static void collapse_huge_page(struct mm_struct *mm,
 	if (!pmd) {
 		result = SCAN_PMD_NULL;
 		mmap_read_unlock(mm);
-		printk(KERN_DEBUG "collapse_huge_page: SCAN_PMD_NULL\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: SCAN_PMD_NULL\n"); //ANINDA
 		goto out_nolock;
 	}
 
@@ -1213,7 +1213,7 @@ static void collapse_huge_page(struct mm_struct *mm,
 	if (unmapped && !__collapse_huge_page_swapin(mm, vma, address,
 						     pmd, referenced, is_synchronous)) {
 		mmap_read_unlock(mm);
-		printk(KERN_DEBUG "collapse_huge_page: __collapse_huge_page_swapin failed\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: __collapse_huge_page_swapin failed\n"); //ANINDA
 		goto out_nolock;
 	}
 
@@ -1226,12 +1226,12 @@ static void collapse_huge_page(struct mm_struct *mm,
 	mmap_write_lock(mm);
 	result = hugepage_vma_revalidate(mm, address, &vma, is_synchronous);
 	if (result) {
-		printk(KERN_DEBUG "collapse_huge_page: hugepage_vma not revalidated #2\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: hugepage_vma not revalidated #2\n"); //ANINDA
 		goto out_up_write;
 	}
 	/* check if the pmd is still valid */
 	if (mm_find_pmd(mm, address) != pmd) {
-		printk(KERN_DEBUG "collapse_huge_page: pmd no longer valid\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: pmd no longer valid\n"); //ANINDA
 		goto out_up_write;
 	}
 
@@ -1273,7 +1273,7 @@ static void collapse_huge_page(struct mm_struct *mm,
 		spin_unlock(pmd_ptl);
 		anon_vma_unlock_write(vma->anon_vma);
 		result = SCAN_FAIL;
-		printk(KERN_DEBUG "collapse_huge_page: SCAN_FAIL\n"); //ANINDA
+		//printk(KERN_DEBUG "collapse_huge_page: SCAN_FAIL\n"); //ANINDA
 		goto out_up_write;
 	}
 
@@ -1313,7 +1313,7 @@ static void collapse_huge_page(struct mm_struct *mm,
 	if (is_synchronous) khugepaged_sync_promotions++;
 	else khugepaged_pages_collapsed++; 
 	result = SCAN_SUCCEED;
-	printk(KERN_DEBUG "collapse_huge_page: SCAN_SUCCEED\n"); //ANINDA
+	//printk(KERN_DEBUG "collapse_huge_page: SCAN_SUCCEED\n"); //ANINDA
 out_up_write:
 	mmap_write_unlock(mm);
 out_nolock:
@@ -1343,18 +1343,18 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 
 	VM_BUG_ON(address & ~HPAGE_PMD_MASK);
 
-	printk(KERN_DEBUG "khugepaged_scan_pmd: address = %lu\n", address); //ANINDA
+	//printk(KERN_DEBUG "khugepaged_scan_pmd: address = %lu\n", address); //ANINDA
 
 	pmd = mm_find_pmd(mm, address);
 	if (!pmd) {
 		result = SCAN_PMD_NULL;
-		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PMD_NULL\n"); //ANINDA
+		//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PMD_NULL\n"); //ANINDA
 		goto out;
 	}
 
 	memset(khugepaged_node_load, 0, sizeof(khugepaged_node_load));
 	pte = pte_offset_map_lock(mm, pmd, address, &ptl);
-        printk(KERN_DEBUG "khugepaged_scan_pmd: pmd = %lu, pte = %lu, gran = %d\n", pmd->pmd, pte->pte, HPAGE_PMD_NR); //ANINDA
+        //printk(KERN_DEBUG "khugepaged_scan_pmd: pmd = %lu, pte = %lu, gran = %d\n", pmd->pmd, pte->pte, HPAGE_PMD_NR); //ANINDA
 	for (_address = address, _pte = pte; _pte < pte+HPAGE_PMD_NR;
 	     _pte++, _address += PAGE_SIZE) {
 		pte_t pteval = *_pte;
@@ -1367,7 +1367,7 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 				 */
 				if (pte_swp_uffd_wp(pteval)) {
 					result = SCAN_PTE_UFFD_WP;
-					printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PTE_UFFD_WP\n"); //ANINDA
+					//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PTE_UFFD_WP\n"); //ANINDA
 					goto out_unmap;
 				}
 				continue;
@@ -1382,7 +1382,7 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 				continue;
 			} else {
 				result = SCAN_EXCEED_NONE_PTE;
-				printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_EXCEED_NONE_PTE\n"); //ANINDA
+				//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_EXCEED_NONE_PTE\n"); //ANINDA
 				goto out_unmap;
 			}
 		}
@@ -1397,7 +1397,7 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 			 * the registered range.  So, just be simple.
 			 */
 			result = SCAN_PTE_UFFD_WP;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PTE_UFFD_WP #2\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PTE_UFFD_WP #2\n"); //ANINDA
 			goto out_unmap;
 		}
 		
@@ -1407,7 +1407,7 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 		page = vm_normal_page(vma, _address, pteval);
 		if (unlikely(!page)) {
 			result = SCAN_PAGE_NULL;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PMD_NULL page\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_PMD_NULL page\n"); //ANINDA
 			goto out_unmap;
 		}
 
@@ -1428,23 +1428,23 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 		node = page_to_nid(page);
 		if (khugepaged_scan_abort(node) && !is_synchronous) { //ANINDA: ignoring node distance constraint for sync promotion
 			result = SCAN_SCAN_ABORT;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_ABORT\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_ABORT\n"); //ANINDA
 			goto out_unmap;
 		}
 		khugepaged_node_load[node]++; //shouldn't have an effect if binding process to specific cpu
 		if (!PageLRU(page)) {
 			result = SCAN_PAGE_LRU;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_LRU\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_LRU\n"); //ANINDA
 			goto out_unmap;
 		}
 		if (PageLocked(page)) {
 			result = SCAN_PAGE_LOCK;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_LOCK\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_LOCK\n"); //ANINDA
 			goto out_unmap;
 		}
 		if (!PageAnon(page)) {
 			result = SCAN_PAGE_ANON;
-			printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_ANON\n"); //ANINDA
+			//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_ANON\n"); //ANINDA
 			goto out_unmap;
 		}
 
@@ -1467,7 +1467,7 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 		 */
 		if (!is_refcount_suitable(page)) {
 			result = SCAN_PAGE_COUNT;
-			if (is_synchronous) printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_COUNT\n"); //ANINDA
+			//if (is_synchronous) printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_COUNT\n"); //ANINDA
 			goto out_unmap;
 		}
 		if (pte_young(pteval) ||
@@ -1477,17 +1477,17 @@ static int khugepaged_scan_pmd(struct mm_struct *mm,
 	}
 	if (!writable) {
 		result = SCAN_PAGE_RO;
-		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_RO\n"); //ANINDA
+		//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_RO\n"); //ANINDA
 	} else if (!is_synchronous && !by_reference && (!referenced || (unmapped && referenced < HPAGE_PMD_NR/2))) {
 		result = SCAN_LACK_REFERENCED_PAGE;
-		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
+		//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
 	} else if (is_synchronous && by_reference && (!referenced || (unmapped && referenced < HPAGE_PMD_NR))) {
 		result = SCAN_LACK_REFERENCED_PAGE;
-		printk(KERN_DEBUG "khugepaged_scan_pmd sync_promote_by_reference: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
+		//printk(KERN_DEBUG "khugepaged_scan_pmd sync_promote_by_reference: SCAN_REFERENCED; references = %d\n", referenced); //ANINDA
 	} else {
 		result = SCAN_SUCCEED;
 		ret = 1;
-		printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_SUCCEED, references = %d\n", referenced); //ANINDA
+		//printk(KERN_DEBUG "khugepaged_scan_pmd: SCAN_SUCCEED, references = %d\n", referenced); //ANINDA
 	}
 
 out_unmap:
