@@ -1,6 +1,6 @@
 # Linux Kernel Modifications for Synchronous Page Size Promotion and Demotion
 
-Linux kernel
+## Linux kernel
 ============
 
 There are several guides for kernel developers and users. These guides can
